@@ -6,6 +6,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      binname: update.sln
+    outputs:
+      asset_name: ${{ env.binname }}
     steps:
     - uses: actions/checkout@v2
     
@@ -25,3 +29,53 @@ jobs:
         arduino-board-fqbn: ${{ steps.sketch.outputs.fqbn}}
         required-libraries: ${{ steps.sketch.outputs.included_libs}}
         set-build-path: true
+
+    - name: copy update file
+      run: cp tbo_device/build/tbo_device.ino.bin ${{ env.binname }}
+
+    - name: Upload output file
+      uses: actions/upload-artifact@v2.2.0
+      with:
+        name: build-bin
+        path: ${{ env.binname }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: metcalfc/changelog-generator@v0.4.4
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download a build bin
+        id: download_bin
+        uses: actions/download-artifact@v2.0.5
+        with:
+          name: build-bin
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.download_zip.outputs.download-path }}/${{ needs.build.outputs.asset_name }}
+          asset_name: ${{ needs.build.outputs.asset_name }}
+          asset_content_type: application/octet-stream
