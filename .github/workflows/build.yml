@@ -1,0 +1,25 @@
+name: "build"
+on:
+  push:
+    tags: 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup Arduino CLI
+      uses: arduino/setup-arduino-cli@v1.1.0
+
+    - name: Parse sketch.json
+      id: sketch
+      uses: alldevic/arduino-sketchjson-parser@v1
+
+    - name: Compile all examples
+      uses: ArminJo/arduino-test-compile@v3.0.0
+      with:
+        arduino-platform: ${{ steps.sketch.outputs.platform}}
+        arduino-board-fqbn: ${{ steps.sketch.outputs.fqbn}}
+        required-libraries: ${{ steps.sketch.outputs.included_libs}}
+        set-build-path: true
