@@ -53,7 +53,7 @@ jobs:
 
       - name: Download a build bin
         id: download_bin
-        uses: actions/download-artifact@v2.0.7
+        uses: actions/download-artifact@v2.0.8
         with:
           name: build-bin
 
