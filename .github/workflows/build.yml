@@ -23,7 +23,7 @@ jobs:
         sketchjson: tbo_device/sketch.json
 
     - name: Compile all examples
-      uses: ArminJo/arduino-test-compile@v3.0.0
+      uses: ArminJo/arduino-test-compile@v3.1.0
       with:
         arduino-platform: ${{ steps.sketch.outputs.platform}}
         arduino-board-fqbn: ${{ steps.sketch.outputs.fqbn}}
