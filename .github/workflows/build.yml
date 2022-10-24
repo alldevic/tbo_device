@@ -34,7 +34,7 @@ jobs:
       run: cp tbo_device/build/tbo_device.ino.bin ${{ env.binname }}
 
     - name: Upload output file
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: build-bin
         path: ${{ env.binname }}
